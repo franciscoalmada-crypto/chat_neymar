@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="chat.html">Chat</a>
+        <a href="login.html">Log-in</a>
+        <a href="cadastro.html">Cadastro</a>
+    </nav>
+
+    <h2>Login</h2>
+
+    <label for="loginEmail">E-mail</label><br>
+    <input type="email" id="loginEmail" placeholder="Digite seu e-mail"><br><br>
+
+    <label for="loginSenha">Senha</label><br>
+    <input type="password" id="loginSenha" placeholder="Digite sua senha"><br><br>
+
+    <button id="btnLogin">Enviar</button>
+    <div id="mensagemLogin"></div>
+
+    <script>
+
+        const btnLogin=document.querySelector('#btnLogin')
+        const mensagemlogin=document.querySelector('#mensagemLogin')
+
+        btnLogin.addEventListener('click', async ()=>{
+
+            const emailEntrada = document.querySelector('#loginEmail');
+            const senhaEntrada = document.querySelector('#loginSenha');
+           
+            const email = emailEntrada.value;
+            const senha=senhaEntrada.value;
+           
+            if ( !email || !senha) {
+                mensagemLogin.innerText = 'Preencha todos os campos antes de enviar!';
+                mensagemLogin.style.color = 'red';
+                return;
+            }
+                   
+            try {
+                const respostaBe = await fetch('http://localhost:3000/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: email,
+                        senha: senha,
+                        
+                    })
+                });
+
+                const dados = await respostaBe.json();
+               
+                if (!respostaBe.ok) {
+                    mensagemLogin.innerText = `${dados.erro}`;
+                    mensagemLogin.style.color = 'red';
+                    return;
+                }
+
+                localStorage.setItem('usuarioLogado', dados.usuario);
+
+                mensagemLogin.innerText = `${dados.mensagem}: ${dados.usuario} entrando no chat`;
+                mensagemLogin.style.color = 'green';
+
+                emailEntrada.value = '';
+                senhaEntrada.value=';'
+
+            } catch (erro) {
+                console.error('Erro na requisição:', erro);
+                mensagemLogin.innerText = 'Erro ao conectar com o servidor!!';
+                mensagemLogin.style.color = 'red';
+            }
+        })
+
+     
+    </script>
+</body>
+</html>
