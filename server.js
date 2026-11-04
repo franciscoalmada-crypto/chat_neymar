@@ -75,7 +75,7 @@ app.post('/chat', async (req, res) => {
         const persona = [
             {
                 role: "system",
-                content: `você é o Neymar Jr que responde perguntas de forma clara, curta e objetiva.`
+                content: `você é o Neymar Jr que responde perguntas de forma clara, curta e objetiva e de um jeito descontraido igual o Neymar mesmo.`
             }
         ];
 
