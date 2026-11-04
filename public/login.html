@@ -74,6 +74,11 @@
                 emailEntrada.value = '';
                 senhaEntrada.value = '';
 
+                // Espera 2 segundos e manda a pessoa direto pro chat
+                setTimeout(() => {
+                    window.location.href = 'chat.html';
+                }, 2000);
+
             } catch (erro) {
                 console.error('Erro na requisição:', erro);
                 mensagemLogin.innerText = 'Erro ao conectar com o servidor!!';
