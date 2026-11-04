@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="chat.html">Chat</a>
+        <a href="login.html">Login</a>
+        <a href="card.html">Cards</a>
+        <a href="cadastro.html">Cadastro</a>
+    </nav>
+
+    <div class="caixa" id="caixaPrincipal">
+        <h2 id="boasVindas">Seja bem vindo ao Chat</h2>
+        <p id="subtitulo" style="text-align:center; margin-top:-10px; color: var(--amarelo); opacity:0.85;">Você está falando com o Neymar Jr</p>
+        <div id="caixaChat"></div>
+
+        <div id="inputArea">
+            <input type="text" id="mensagem" placeholder="Digite sua mensagem">
+            <button id="btnEnviar">Enviar</button>
+        </div>
+
+        <button id="btnSair" style="margin-top:10px;">Sair</button>
+    </div>
+
+    <script>
+        // Pega o nome salvo no login. Se ninguém logou ainda, isso vem vazio (null).
+        const usuarioLogado = localStorage.getItem('usuarioLogado')
+
+        if (!usuarioLogado) {
+            // Ninguém logado: troca o conteúdo da caixa por um aviso,
+            // e nem monta o resto do chat.
+            document.querySelector('#caixaPrincipal').innerHTML = `
+                <h2>Acesso restrito</h2>
+                <p>Você precisa estar logado para usar o chat.</p>
+                 <p><a href="cadastro.html">Clique aqui para fazer cadastro</a></p>
+            `
+        } else {
+            // Usuário logado: monta o chat normalmente.
+            document.querySelector('#boasVindas').textContent = `Olá ${usuarioLogado}, seja bem vindo`
+            const caixaChat = document.querySelector('#caixaChat')
+            const inputMensagem = document.querySelector('#mensagem')
+            const btnEnviar = document.querySelector('#btnEnviar')
+            const btnSair = document.querySelector('#btnSair')
+
+            const historicoConversa = []
+
+            function mensagemTela(autor, texto) {
+                const textoFinal = document.createElement('p')
+                textoFinal.className = 'msg'
+                textoFinal.textContent = `${autor}, ${texto}`
+                caixaChat.appendChild(textoFinal)
+                caixaChat.scrollTop = caixaChat.scrollHeight
+            }
+
+            btnEnviar.addEventListener('click', async () => {
+                const textoMensagem = inputMensagem.value.trim()
+
+                if (!textoMensagem) return
+
+                mensagemTela(usuarioLogado, textoMensagem)
+                historicoConversa.push({ role: "user", content: textoMensagem })
+
+                inputMensagem.value = ''
+                btnEnviar.disabled = true
+
+                try {
+                    const respostaServidor = await fetch('/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ historico: historicoConversa })
+                    })
+
+                    const dados = await respostaServidor.json()
+                    if (!respostaServidor.ok) {
+                        mensagemTela('Sistema', dados.erro)
+                        return
+                    }
+
+                    mensagemTela('Neymar jr', dados.resposta)
+                }
+                catch (erro) {
+                    mensagemTela('Sistema', 'Erro ao conectar com o servidor')
+                }
+                finally {
+                    btnEnviar.disabled = false
+                }
+            })
+
+            // Botão de sair: apaga o login salvo e manda de volta pra tela de login.
+            btnSair.addEventListener('click', () => {
+                localStorage.removeItem('usuarioLogado')
+                window.location.href = 'login.html'
+            })
+        }
+    </script>
+</body>
+</html>
